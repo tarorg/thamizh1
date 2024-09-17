@@ -13,38 +13,32 @@ interface WordData {
 console.log('DB module loaded');
 
 export async function getWord(word: string): Promise<WordData | null> {
-  console.log('DB: Executing getWord query for:', word);
+  console.log('getWord function called with:', word);
   try {
     const result = await turso.execute({
-      sql: 'SELECT * FROM words WHERE LOWER(word) = LOWER(?)',
+      sql: 'SELECT * FROM words WHERE word = ?',
       args: [word]
     });
-    console.log('DB: getWord query result:', result);
-    if (result && result.rows && result.rows.length > 0) {
-      console.log('DB: Word found:', result.rows[0]);
-      return result.rows[0] as WordData;
-    } else {
-      console.log('DB: Word not found');
-      return null;
-    }
+    console.log('getWord query result:', result);
+    return result.rows[0] || null;
   } catch (error) {
-    console.error('DB: Error in getWord:', error);
-    return null;
+    console.error('Error in getWord:', error);
+    throw error;
   }
 }
 
 export async function searchWords(query: string): Promise<{ word: string }[]> {
-  console.log('Executing searchWords query for:', query);
+  console.log('searchWords function called with:', query);
   try {
-    const { rows } = await turso.execute({
-      sql: 'SELECT word FROM words WHERE LOWER(word) LIKE LOWER(?) LIMIT 10',
-      args: [`%${query}%`]
+    const result = await turso.execute({
+      sql: 'SELECT word FROM words WHERE word LIKE ? LIMIT 10',
+      args: [`${query}%`]
     });
-    console.log('searchWords query result:', rows);
-    return rows as { word: string }[];
+    console.log('searchWords query result:', result);
+    return result.rows.map(row => ({ word: row.word }));
   } catch (error) {
     console.error('Error in searchWords:', error);
-    return [];
+    throw error;
   }
 }
 

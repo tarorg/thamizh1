@@ -6,23 +6,39 @@ import SearchBar from '../components/SearchBar.astro';
 import WordDefinition from '../components/WordDefinition.astro';
 import { getWord, searchWords } from '../lib/db';
 
+interface SearchResult {
+  word: string;
+}
+
+console.log('Starting index page rendering');
+
 let error = '';
-let wordData = null;
-let searchResults = [];
+let wordData: any = null;
+let searchResults: SearchResult[] = [];
 let searchWord = '';
 
 try {
+  console.log('Entering try block');
   searchWord = Astro.url.searchParams.get('word') || '';
+  console.log('Search word:', searchWord);
+  
   if (searchWord) {
+    console.log('Attempting to get word data');
     wordData = await getWord(searchWord);
+    console.log('Word data:', wordData);
+    
     if (!wordData) {
+      console.log('Word not found, searching for similar words');
       searchResults = await searchWords(searchWord);
+      console.log('Search results:', searchResults);
     }
   }
 } catch (e) {
-  console.error('Error:', e);
+  console.error('Error in index page:', e);
   error = 'An error occurred while processing your request. Please try again later.';
 }
+
+console.log('Finished processing, rendering page');
 ---
 
 <Layout title="தமிழ் அகராதி">
@@ -30,7 +46,7 @@ try {
 	<SidePanel />
 	<main>
 		<SearchBar initialQuery={searchWord} />
-		{error && <p class="error">{error}</p>}
+			{error && <p class="error">{error}</p>}
 		<div id="result-container">
 			{wordData ? (
 				<WordDefinition {...wordData} />
