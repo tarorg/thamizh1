@@ -1,0 +1,43 @@
+---
+const tabs = ['பெயர்ச்சொல்', 'வினைச்சொல்', 'உரிச்சொல்'];
+---
+
+<div class="word-tabs">
+    {tabs.map((tab, index) => (
+        <button class={`tab ${index === 0 ? 'active' : ''}`} data-tab={tab}>
+            {tab}
+        </button>
+    ))}
+</div>
+
+<style>
+    .word-tabs {
+        display: flex;
+        margin-bottom: 1rem;
+    }
+    .tab {
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+    }
+    .tab.active {
+        opacity: 1;
+        border-bottom: 2px solid var(--accent-color);
+    }
+</style>
+
+<script>
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            // Here you would typically update the content based on the selected tab
+        });
+    });
+</script>

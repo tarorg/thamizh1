@@ -1,0 +1,142 @@
+---
+const menuItems = [
+    { label: 'அகராதி', href: '/' },  // Added this line for the dictionary search
+    { label: 'ஊர்தி', href: '/urthi' },
+    { label: 'குழந்தை பெயர்கள்', href: '/baby-names' },
+    { label: 'தமிழ் பள்ளிகள்', href: '/tamil-schools' },
+];
+---
+
+<div class="menu-container">
+    <button id="menu-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <aside id="side-panel" class="side-panel">
+        <nav>
+            <ul>
+                {menuItems.map(item => (
+                    <li>
+                        <a href={item.href}>
+                            {item.label}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </nav>
+    </aside>
+</div>
+
+<style>
+    .menu-container {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+    }
+
+    #menu-toggle {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1001;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+    }
+
+    #menu-toggle span {
+        display: block;
+        width: 25px;
+        height: 3px;
+        background-color: var(--text-color);
+        margin: 5px 0;
+        transition: 0.4s;
+    }
+
+    .side-panel {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        bottom: 0;
+        width: 250px;
+        background-color: var(--background-color);
+        padding: 4rem 1rem 2rem;
+        overflow-y: auto;
+        transition: left 0.3s ease-in-out;
+    }
+
+    .side-panel.open {
+        left: 0;
+    }
+
+    nav ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    nav li {
+        margin-bottom: 1rem;
+    }
+
+    nav a {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: var(--text-color);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    nav a:hover, nav a:focus {
+        background-color: var(--accent-color);
+        color: var(--background-color);
+    }
+</style>
+
+<script>
+    class SidePanel extends HTMLElement {
+        constructor() {
+            super();
+            this.toggleMenu = this.toggleMenu.bind(this);
+            this.handleClickOutside = this.handleClickOutside.bind(this);
+        }
+
+        connectedCallback() {
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidePanel = document.getElementById('side-panel');
+
+            if (menuToggle && sidePanel) {
+                menuToggle.addEventListener('click', this.toggleMenu);
+                document.addEventListener('click', this.handleClickOutside);
+            }
+        }
+
+        toggleMenu(event: Event) {
+            event.stopPropagation();
+            const sidePanel = document.getElementById('side-panel');
+            if (sidePanel) {
+                sidePanel.classList.toggle('open');
+            }
+        }
+
+        handleClickOutside(event: MouseEvent) {
+            const sidePanel = document.getElementById('side-panel');
+            const menuToggle = document.getElementById('menu-toggle');
+
+            if (sidePanel && menuToggle) {
+                if (!sidePanel.contains(event.target as Node) && !menuToggle.contains(event.target as Node)) {
+                    sidePanel.classList.remove('open');
+                }
+            }
+        }
+    }
+
+    customElements.define('side-panel', SidePanel);
+</script>
+
+<side-panel></side-panel>

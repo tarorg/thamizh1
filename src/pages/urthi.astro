@@ -1,0 +1,157 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SidePanel from '../components/SidePanel.astro';
+---
+
+<Layout title="ஊர்தி - தமிழ் அகராதி">
+    <SidePanel />
+    <main>
+        <h1>ஊர்தி</h1>
+        <div class="input-container">
+            <input type="text" id="urthiInput" placeholder="Enter text to convert">
+            <button id="convertButton">Convert</button>
+        </div>
+        <div class="result-card">
+            <h2>Result:</h2>
+            <p id="resultText"></p>
+        </div>
+    </main>
+</Layout>
+
+<script>
+    const conversionMap = {
+        'TN': 'தநா', 'A': 'ஆ', 'B': 'இ', 'C': 'ஈ', 'D': 'உ', 'E': 'ஊ',
+        'F': 'எ', 'G': 'அ', 'H': 'ஏ', 'J': 'இ', 'K': 'கு', 'L': 'ஞு',
+        'M': 'கி', 'N': 'நா', 'P': 'சு', 'Q': 'லி', 'R': 'னி', 'S': 'பா',
+        'T': 'ற்', 'U': 'ய', 'V': 'ர', 'W': 'ல', 'X': 'வ', 'Y': 'ழ',
+        'Z': 'ள', '0': '0', '1': 'க', '2': 'உ', '3': 'நு', '4': 'சு',
+        '5': 'று', '6': 'சூ', '7': 'ஞ', '8': 'அ', '9': 'கூ'
+    };
+
+    function convertText(input: string): string {
+        console.log('Converting text:', input);
+        let result = '';
+        const upperInput = input.toUpperCase();
+        let i = 0;
+
+        while (i < upperInput.length) {
+            if (i === 0 && upperInput.startsWith('TN')) {
+                result += conversionMap['TN'];
+                i += 2;
+            } else {
+                const char = upperInput[i];
+                result += conversionMap[char as keyof typeof conversionMap] || char;
+                i++;
+            }
+        }
+
+        console.log('Conversion result:', result);
+        return result;
+    }
+
+    function setupConversion() {
+        console.log('Setting up conversion');
+        const input = document.getElementById('urthiInput') as HTMLInputElement | null;
+        const convertButton = document.getElementById('convertButton');
+        const resultText = document.getElementById('resultText');
+
+        if (convertButton && input && resultText) {
+            console.log('Elements found');
+            const performConversion = () => {
+                try {
+                    const inputText = input.value;
+                    console.log('Input text:', inputText);
+                    const convertedText = convertText(inputText);
+                    console.log('Converted text:', convertedText);
+                    resultText.textContent = convertedText;
+                } catch (error) {
+                    console.error('Error during conversion:', error);
+                    resultText.textContent = 'Error occurred during conversion';
+                }
+            };
+
+            convertButton.addEventListener('click', performConversion);
+            console.log('Click event listener added');
+
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performConversion();
+                }
+            });
+            console.log('Keypress event listener added');
+
+            // Perform initial conversion if there's any text in the input
+            if (input.value) {
+                performConversion();
+            }
+        } else {
+            console.error('One or more elements not found');
+        }
+    }
+
+    // Run setup on both initial load and subsequent navigations
+    document.addEventListener('astro:page-load', setupConversion);
+    setupConversion(); // Run immediately for initial page load
+</script>
+
+<style>
+    main {
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    h1 {
+        color: var(--accent-color);
+        margin-bottom: 2rem;
+    }
+
+    .input-container {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    input {
+        flex-grow: 1;
+        padding: 0.5rem;
+        font-size: 1rem;
+        border: 1px solid var(--text-color);
+        border-radius: 4px;
+        background-color: var(--background-color);
+        color: var(--text-color);
+    }
+
+    button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        background-color: var(--accent-color);
+        color: var(--background-color);
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: var(--accent-hover-color);
+    }
+
+    .result-card {
+        background-color: var(--card-bg-color, #f0f0f0);
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-card h2 {
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    #resultText {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--accent-color);
+    }
+</style>

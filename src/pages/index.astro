@@ -1,0 +1,148 @@
+---
+console.log('Index page is loading');
+
+import Layout from '../layouts/Layout.astro';
+import SearchBar from '../components/SearchBar.astro';
+import WordDefinition from '../components/WordDefinition.astro';
+import SidePanel from '../components/SidePanel.astro';
+import { getWord, searchWords } from '../lib/db';
+import { ViewTransitions } from 'astro:transitions';
+
+console.log('Starting page load');
+
+const searchWord = Astro.url.searchParams.get('word') || '';
+console.log('Index: Searching for:', searchWord);
+
+let wordData = null;
+let searchResults: { word: string }[] = [];
+let error = null;
+
+if (searchWord) {
+  try {
+    wordData = await getWord(searchWord);
+    console.log('Index: Initial word data:', wordData);
+
+    if (!wordData) {
+      console.log('Index: No exact match found, searching for similar words');
+      searchResults = await searchWords(searchWord);
+      console.log('Index: Search results:', searchResults);
+      
+      if (searchResults.length > 0) {
+        wordData = await getWord(searchResults[0].word);
+        console.log('Index: First search result data:', wordData);
+      }
+    }
+  } catch (e) {
+    console.error('Error during search:', e);
+    error = 'An error occurred while searching. Please try again.';
+  }
+}
+
+console.log('Index: Final word data:', wordData);
+---
+
+<Layout title="தமிழ் அகராதி">
+	<ViewTransitions />
+	<SidePanel />
+	<main>
+		<SearchBar initialQuery={searchWord} />
+		{error && <p class="error">{error}</p>}
+		<div id="result-container">
+			{wordData ? (
+				<WordDefinition {...wordData} />
+			) : searchWord ? (
+				<p>சொல் கண்டுபிடிக்கப்படவில்லை. (Word not found.)</p>
+			) : null}
+		</div>
+		{searchResults.length > 0 && (
+			<div>
+				<h3>Similar words:</h3>
+				<ul class="word-list">
+					{searchResults.map((result) => (
+						<li><a href={`/?word=${encodeURIComponent(result.word)}`} data-astro-reload>{result.word}</a></li>
+					))}
+				</ul>
+			</div>
+		)}
+	</main>
+</Layout>
+
+<script>
+  // Function to load word definition
+  async function loadWordDefinition(word: string) {
+    const resultContainer = document.getElementById('result-container');
+    if (resultContainer) {
+      resultContainer.innerHTML = '<p>Loading...</p>';
+      try {
+        console.log('Fetching word definition for:', word);
+        const response = await fetch(`/api/word.json?word=${encodeURIComponent(word)}`);
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
+        const contentType = response.headers.get("content-type");
+        console.log('Content-Type:', contentType);
+        
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.error('Received non-JSON response:', text);
+          throw new Error(`Received non-JSON response: ${contentType}`);
+        }
+
+        const data = await response.json();
+        console.log('Parsed JSON data:', data);
+
+        if (response.ok) {
+          if (data && data.word) {
+            resultContainer.innerHTML = `
+              <h2>${data.word}</h2>
+              <p>Phonetic: ${data.phonetic || 'N/A'}</p>
+              <p>Meaning: ${data.meaning || 'N/A'}</p>
+              <p>Synonyms: ${data.synonyms || 'N/A'}</p>
+              <p>Source: <a href="${data.source || '#'}" target="_blank">${data.source || 'N/A'}</a></p>
+            `;
+          } else {
+            resultContainer.innerHTML = '<p>சொல் கண்டுபிடிக்கப்படவில்லை. (Word not found.)</p>';
+          }
+        } else {
+          resultContainer.innerHTML = `<p>Error: ${data.error || 'Unknown error occurred'}</p>`;
+        }
+      } catch (error) {
+        console.error('Error loading word definition:', error);
+        resultContainer.innerHTML = `<p>Error loading word definition: ${error instanceof Error ? error.message : String(error)}</p>`;
+      }
+    }
+  }
+
+  // Handle browser back/forward navigation
+  window.addEventListener('popstate', () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const word = searchParams.get('word');
+    if (word) {
+      loadWordDefinition(word);
+    } else {
+      const resultContainer = document.getElementById('result-container');
+      if (resultContainer) {
+        resultContainer.innerHTML = '';
+      }
+    }
+  });
+
+  // Initial load if there's a word in the URL
+  const initialSearchParams = new URLSearchParams(window.location.search);
+  const initialWord = initialSearchParams.get('word');
+  if (initialWord) {
+    loadWordDefinition(initialWord);
+  }
+</script>
+
+<style>
+	main {
+		padding: 2rem;
+		color: var(--text-color);
+		font-size: 20px;
+		line-height: 1.6;
+		max-width: 800px;
+		margin: 0 auto;
+	}
+	/* ... (keep the other existing styles) */
+</style>

@@ -1,0 +1,68 @@
+---
+import MediaTabs from './MediaTabs.astro';
+
+interface Props {
+    word: string;
+    phonetic: string;
+    meaning: string;
+    synonyms: string;
+    image_url?: string;
+    audio_url?: string;
+}
+
+const { word, phonetic, meaning, synonyms, image_url, audio_url } = Astro.props;
+---
+
+<div class="word-definition">
+    <div class="word-header">
+        <div>
+            <h2>{word}</h2>
+            <p class="phonetic">{phonetic}</p>
+        </div>
+    </div>
+    <MediaTabs imageUrl={image_url} audioUrl={audio_url} word={word}>
+        <div class="meaning">
+            <h4>பொருள்</h4>
+            <ul>
+                <li>{meaning}</li>
+            </ul>
+        </div>
+        <div class="synonyms">
+            <h4>இணைச்சொற்கள்</h4>
+            <p>{synonyms}</p>
+        </div>
+    </MediaTabs>
+</div>
+
+<style>
+    .word-definition {
+        color: var(--text-color);
+    }
+    .word-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem; /* Reduced from 2rem */
+    }
+    h2 {
+        font-size: 2.5rem; /* Reduced from 3rem */
+        margin-bottom: 0.25rem; /* Reduced from 0.5rem */
+    }
+    .phonetic {
+        color: var(--accent-color);
+        font-size: 1.25rem; /* Reduced from 1.5rem */
+    }
+    h4 {
+        color: #757575;
+        margin-bottom: 0.75rem; /* Reduced from 1rem */
+    }
+    ul {
+        padding-left: 1.25rem; /* Reduced from 1.5rem */
+        margin-bottom: 1.5rem; /* Reduced from 2rem */
+    }
+    .synonyms p {
+        color: var(--accent-color);
+        display: inline;
+        margin-left: 0.75rem; /* Reduced from 1rem */
+    }
+</style>

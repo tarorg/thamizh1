@@ -1,0 +1,119 @@
+---
+interface Props {
+    imageUrl?: string;
+    audioUrl?: string;
+    word: string;
+}
+
+const { imageUrl, audioUrl, word } = Astro.props;
+---
+
+<div class="media-tabs">
+    <div class="tab-buttons" role="tablist">
+        <button class="tab-button active" role="tab" aria-selected="true" data-tab="definition">பொருள்</button>
+        <button class="tab-button" role="tab" aria-selected="false" data-tab="image">படம்</button>
+        <button class="tab-button" role="tab" aria-selected="false" data-tab="audio">ஒலி</button>
+    </div>
+    <div class="tab-content">
+        <div class="tab-pane active" id="definition" role="tabpanel">
+            <slot />
+        </div>
+        <div class="tab-pane" id="image" role="tabpanel">
+            {imageUrl ? (
+                <img src={imageUrl} alt={word} />
+            ) : (
+                <p>படம் கிடைக்கவில்லை</p>
+            )}
+        </div>
+        <div class="tab-pane" id="audio" role="tabpanel">
+            {audioUrl ? (
+                <audio controls>
+                    <source src={audioUrl} type="audio/mpeg">
+                    உங்கள் உலாவி ஒலி கூறுக்கு ஆதரவளிக்கவில்லை.
+                </audio>
+            ) : (
+                <p>ஒலி கிடைக்கவில்லை</p>
+            )}
+        </div>
+    </div>
+</div>
+
+<style>
+    .media-tabs {
+        margin-bottom: 1.5rem; /* Reduced from 2rem */
+    }
+    .tab-buttons {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 0.75rem; /* Reduced from 1rem */
+        border-bottom: 2px solid var(--input-bg);
+    }
+    .tab-button {
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 0.9rem; /* Reduced from 1rem */
+        padding: 0.5rem 1rem; /* Reduced from 0.75rem 1.5rem */
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        margin-right: 0.25rem; /* Reduced from 0.5rem */
+        border-bottom: 2px solid transparent;
+        opacity: 0.6;
+    }
+    .tab-button:hover {
+        opacity: 0.8;
+    }
+    .tab-button.active {
+        opacity: 1;
+        font-weight: bold;
+        color: var(--accent-color);
+        border-bottom: 2px solid var(--accent-color);
+    }
+    .tab-content {
+        background-color: var(--input-bg);
+        border-radius: 8px;
+        padding: 1.25rem; /* Reduced from 1.5rem */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+    }
+    .tab-pane {
+        display: none;
+    }
+    .tab-pane.active {
+        display: block;
+    }
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+    }
+    audio {
+        width: 100%;
+        margin-top: 0.75rem; /* Reduced from 1rem */
+    }
+</style>
+
+<script>
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tab = button.getAttribute('data-tab');
+            if (tab) {
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-selected', 'false');
+                });
+                tabPanes.forEach(pane => pane.classList.remove('active'));
+                button.classList.add('active');
+                button.setAttribute('aria-selected', 'true');
+                const activePane = document.getElementById(tab);
+                if (activePane) {
+                    activePane.classList.add('active');
+                }
+            }
+        });
+    });
+</script>
