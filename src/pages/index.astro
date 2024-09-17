@@ -1,44 +1,28 @@
 ---
-console.log('Index page is loading');
-
 import Layout from '../layouts/Layout.astro';
+import { ViewTransitions } from 'astro:transitions';
+import SidePanel from '../components/SidePanel.astro';
 import SearchBar from '../components/SearchBar.astro';
 import WordDefinition from '../components/WordDefinition.astro';
-import SidePanel from '../components/SidePanel.astro';
 import { getWord, searchWords } from '../lib/db';
-import { ViewTransitions } from 'astro:transitions';
 
-console.log('Starting page load');
-
-const searchWord = Astro.url.searchParams.get('word') || '';
-console.log('Index: Searching for:', searchWord);
-
+let error = '';
 let wordData = null;
-let searchResults: { word: string }[] = [];
-let error = null;
+let searchResults = [];
+let searchWord = '';
 
-if (searchWord) {
-  try {
+try {
+  searchWord = Astro.url.searchParams.get('word') || '';
+  if (searchWord) {
     wordData = await getWord(searchWord);
-    console.log('Index: Initial word data:', wordData);
-
     if (!wordData) {
-      console.log('Index: No exact match found, searching for similar words');
       searchResults = await searchWords(searchWord);
-      console.log('Index: Search results:', searchResults);
-      
-      if (searchResults.length > 0) {
-        wordData = await getWord(searchResults[0].word);
-        console.log('Index: First search result data:', wordData);
-      }
     }
-  } catch (e) {
-    console.error('Error during search:', e);
-    error = 'An error occurred while searching. Please try again.';
   }
+} catch (e) {
+  console.error('Error:', e);
+  error = 'An error occurred while processing your request. Please try again later.';
 }
-
-console.log('Index: Final word data:', wordData);
 ---
 
 <Layout title="தமிழ் அகராதி">
