@@ -52,91 +52,71 @@ const menuItems = [
         display: block;
         width: 25px;
         height: 3px;
-        background-color: var(--text-color);
-        margin: 5px 0;
-        transition: 0.4s;
+        margin-bottom: 5px;
+        position: relative;
+        background: #333;
+        border-radius: 3px;
+        z-index: 1;
     }
 
     .side-panel {
         position: fixed;
-        left: -250px;
         top: 0;
-        bottom: 0;
+        left: -250px;
         width: 250px;
-        background-color: var(--background-color);
-        padding: 4rem 1rem 2rem;
-        overflow-y: auto;
+        height: 100%;
+        background-color: white; /* Changed to white */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
         transition: left 0.3s ease-in-out;
+        z-index: 1000;
+        overflow-y: auto;
     }
 
     .side-panel.open {
         left: 0;
     }
 
-    nav ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
+    .side-panel nav {
+        padding: 2rem 1rem;
     }
 
-    nav li {
+    .side-panel ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .side-panel li {
         margin-bottom: 1rem;
     }
 
-    nav a {
-        display: block;
-        padding: 0.75rem 1rem;
-        color: var(--text-color);
+    .side-panel a {
+        color: #333;
         text-decoration: none;
-        border-radius: 8px;
-        transition: background-color 0.3s ease;
+        font-size: 1.1rem;
+        transition: color 0.3s ease;
     }
 
-    nav a:hover, nav a:focus {
-        background-color: var(--accent-color);
-        color: var(--background-color);
+    .side-panel a:hover {
+        color: #007bff;
     }
 </style>
 
 <script>
-    class SidePanel extends HTMLElement {
-        constructor() {
-            super();
-            this.toggleMenu = this.toggleMenu.bind(this);
-            this.handleClickOutside = this.handleClickOutside.bind(this);
-        }
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidePanel = document.getElementById('side-panel');
 
-        connectedCallback() {
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidePanel = document.getElementById('side-panel');
-
-            if (menuToggle && sidePanel) {
-                menuToggle.addEventListener('click', this.toggleMenu);
-                document.addEventListener('click', this.handleClickOutside);
-            }
-        }
-
-        toggleMenu(event: Event) {
-            event.stopPropagation();
-            const sidePanel = document.getElementById('side-panel');
-            if (sidePanel) {
-                sidePanel.classList.toggle('open');
-            }
-        }
-
-        handleClickOutside(event: MouseEvent) {
-            const sidePanel = document.getElementById('side-panel');
-            const menuToggle = document.getElementById('menu-toggle');
-
-            if (sidePanel && menuToggle) {
-                if (!sidePanel.contains(event.target as Node) && !menuToggle.contains(event.target as Node)) {
-                    sidePanel.classList.remove('open');
-                }
-            }
-        }
+    if (menuToggle && sidePanel) {
+        menuToggle.addEventListener('click', () => {
+            sidePanel.classList.toggle('open');
+        });
     }
 
-    customElements.define('side-panel', SidePanel);
+    // Close the menu when clicking outside
+    document.addEventListener('click', (event) => {
+        if (sidePanel && menuToggle && !sidePanel.contains(event.target as Node) && !menuToggle.contains(event.target as Node)) {
+            sidePanel.classList.remove('open');
+        }
+    });
 </script>
 
 <side-panel></side-panel>
